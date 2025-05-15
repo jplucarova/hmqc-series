@@ -27,8 +27,9 @@ done > expno-time.dat
 sed -i "" 's/:/ : /g' expno-time.dat
 
 # The following part within '' calculates the time from the start of the first experiment in hours
-awk 'BEGIN   {
-idx = 0;
+awk '
+BEGIN {
+    idx = 0;
 }
 
 {
@@ -39,31 +40,33 @@ idx = 0;
     idx++;
     T = 0
 }
+
 END {
+    for(i=1; i<idx; i++){
+        DH = H[i] - H[i-1];
+        if(DH < 0){
+            DH = 24 + DH;
+        };
+        DM = M[i] - M[i-1];
+        if(DM < 0){
+            DM = 60 + DM; DH = DH - 1
+        };
+        DS = S[i] - S[i-1];
+        if(DS < 0){
+            DS = 60 + DS; DM = DM - 1
+        };
 
-for(i=1; i<idx; i++){
+        MH = DM / 60;
+        SH = DS / 3600;
+        Htot = MH + SH + DH;
+        T = T + Htot;
 
-    DH = H[i] - H[i-1];
-    if(DH < 0){DH = 24 + DH;
-    	      };
-    DM = M[i] - M[i-1];
-    if(DM < 0){DM = 60 + DM; DH = DH - 1
-    	      };
-    DS = S[i] - S[i-1];
-    if(DS < 0){DS = 60 + DS; DM = DM - 1
-    	      };
+    #    MS = 60 * DM;
+    #    Tot = MS + DS;
+    #    T = T + Tot;
+    #    H = T / 3600
 
-	MH = DM / 60;
-   	SH = DS / 3600;
-   	Htot = MH + SH + DH;
-   	T = T + Htot;
-
-#    MS = 60 * DM;
-#    Tot = MS + DS;
-#    T = T + Tot;
-#    H = T / 3600
-
-    print E[i],DH,DM,DS,Htot,T;
-   		    }
-    }' expno-time.dat >> WT-pl-time-H.dat
+        print E[i],DH,DM,DS,Htot,T;
+    }
+}' expno-time.dat >> WT-pl-time-H.dat
 
